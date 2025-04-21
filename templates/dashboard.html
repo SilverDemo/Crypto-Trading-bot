@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .dashboard { padding: 20px; }
+        .chart { margin-bottom: 30px; height: 400px; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div id="portfolioChart" class="chart"></div>
+        <div id="positionsChart" class="chart"></div>
+        <div id="tradesTable"></div>
+    </div>
+
+    <script>
+    function loadData() {
+        fetch('portfolio.json').then(r => r.json()).then(updateCharts);
+        fetch('trades.json').then(r => r.json()).then(updateTrades);
+    }
+
+    function updateCharts(data) {
+        // Portfolio Value Chart
+        Plotly.react('portfolioChart', [{
+            x: data.history.map(p => p.timestamp),
+            y: data.history.map(p => p.value),
+            type: 'scatter',
+            name: 'Portfolio Value'
+        }], {title: 'Portfolio Value'});
+
+        // Positions Pie Chart
+        const positions = Object.entries(data.current.positions).map(([symbol, qty]) => ({
+            values: [Math.abs(qty)],
+            labels: [symbol],
+            type: 'pie'
+        }));
+        
+        Plotly.react('positionsChart', positions, {title: 'Asset Allocation'});
+    }
+
+    function updateTrades(data) {
+        const html = `
+            <h3>Recent Trades</h3>
+            <table>
+                <tr>
+                    <th>Time</th>
+                    <th>Symbol</th>
+                    <th>Action</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+                ${data.trades.reverse().map(trade => `
+                    <tr>
+                        <td>${new Date(trade.timestamp).toLocaleTimeString()}</td>
+                        <td>${trade.symbol}</td>
+                        <td>${trade.action}</td>
+                        <td>${trade.quantity.toFixed(4)}</td>
+                        <td>${trade.price.toFixed(2)}</td>
+                    </tr>
+                `).join('')}
+            </table>
+        `;
+        document.getElementById('tradesTable').innerHTML = html;
+    }
+
+    setInterval(loadData, 5000);
+    loadData();
+    </script>
+</body>
+</html>

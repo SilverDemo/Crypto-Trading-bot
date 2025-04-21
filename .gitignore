@@ -1,0 +1,10 @@
+# Ignore sensitive files
+config.ini
+*.json
+__pycache__/
+*.pyc
+.env
+.DS_Store
+.out/
+.logs/
+.checkpoints/
