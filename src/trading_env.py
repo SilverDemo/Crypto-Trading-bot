@@ -89,7 +89,7 @@ class TradingEnvironment(gym.Env):
     
     def _calculate_reward(self):
         new_value = self.portfolio_value
-        reward = new_value - self.prev_value  # Simple absolute reward
+        reward = (new_value - self.prev_value)/self.prev_value 
         self.prev_value = new_value
         return np.clip(reward, -1, 1)
     

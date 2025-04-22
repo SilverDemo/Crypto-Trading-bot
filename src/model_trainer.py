@@ -34,11 +34,11 @@ class TimeEstimateCallback(BaseCallback):
         elapsed_str = self._format_time(elapsed_time)
         remaining_str = self._format_time(remaining) if remaining != float('inf') else "--:--:--"
         
-        print(f"\nProgress: {current_progress*100:.1f}% | "
-              f"Elapsed: {elapsed_str} | "
-              f"Remaining: {remaining_str} | "
-              f"Steps/s: {self.num_timesteps/elapsed_time:.1f}")
-
+        print(f"\rProgress: {current_progress*100:.1f}% ({self.num_timesteps}/{self.total_timesteps})| "
+                  f"Elapsed: {elapsed_str} | "
+                  f"Remaining: {remaining_str} | "
+                  f"Steps/s: {self.num_timesteps/elapsed_time:.1f}",
+                  end="", flush=True)
         return True
 
     def _format_time(self, seconds):
@@ -89,8 +89,8 @@ class ModelTrainer:
         try:
             time_callback = TimeEstimateCallback(self.total_timesteps)
             checkpoint_callback = CheckpointCallback(
-                save_freq=10000,
-                save_path='./checkpoints/',
+                save_freq=100000,
+                save_path='./.checkpoints/',
                 name_prefix='model'
             )
             self.model.learn(
